@@ -20,12 +20,12 @@
 
 ## 테스트용 클라이언트 CA 인증서 생성
 
-클라이언트 인증서를 검증할 때 사용할 (self-signed)**CA 인증서**를 2개 생성한다.
+클라이언트 인증서를 검증할 때 사용할 (self-signed) **CA 인증서**를 2개 생성한다.
 - [유효한 CA 인증서](#유효한-CA-인증서-생성)
 - [유효하지 않은 CA 인증서](#유효하지-않은-CA-인증서-생성)
 
 ### 유효한 CA 인증서 생성
-```sh
+```fish
 openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout valid-ca.key -x509 -days 365 \
  -outform PEM -out valid-ca.crt
 
@@ -40,13 +40,13 @@ Common Name (eg, fully qualified host name) []:kftc.io
 Email Address []:dy.ryu@kftc.or.kr
 ```
 
-현재 디렉토리에 `valid-ca.crt` 파일과 `valid-ca.key` 두 개의 파일이 생성된다.
+현재 디렉토리에 `valid-ca.crt` 파일과 `valid-ca.key` 두 개의 파일이 생성된다.\
 이중 `valid-ca.crt` 파일은 **웹서버에 업로드**한다.
 
 ### 유효하지 않은 CA 인증서 생성
 
 위와 동일한 방법으로 **유효하지 않은 CA 인증서**도 한 개 생성한다. (웹서버 업로드 X)
-```sh
+```fish
 openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout invalid-ca.key -x509 -days 365 \
  -outform PEM -out invalid-ca.crt
 ```
@@ -60,10 +60,10 @@ openssl req -newkey rsa:2048 -nodes -keyform PEM -keyout invalid-ca.key -x509 -d
 - [SerialNumber가 다른 인증서](#SerialNumber가-다른-인증서)
 - [CA가 다른 인증서](#CA가-다른-인증서)
 
-> 원래 SerialNumber는 Subject DN 안에 기술되어 있으나, 여기에서는 편의상 **OU(Organizational Unit Name)**에 기재한다.
+> 원래 SerialNumber는 Subject DN 안에 기술되어 있으나, 여기에서는 편의상 OU(Organizational Unit Name)에 기재한다.
 
 우선 공통으로 사용할 개인키 파일을 생성한다.
-```sh
+```fish
 openssl genrsa -out pass.key 2048
 
 # 실행 결과
@@ -79,7 +79,7 @@ e is 65537 (0x10001)
 ### 정상 인증서
 
 CSR(Certificate Signing Request) 파일을 생성한다.
-```sh
+```fish
 openssl req -new -key pass.key -out valid-cli.csr
 
 # 실행 결과
@@ -100,7 +100,7 @@ A challenge password []:
 > Challenge password는 편의상 생략한다. (값 입력 없이 엔터키를 치면 비밀번호가 없는 CSR 파일이 생성된다.)
 
 유효한 CA 인증서(`valid-ca.crt`, `valid-ca.key`)로 CSR 파일(`valid-cli.csr`)을 서명한다.
-```sh
+```fish
 openssl x509 -req -in valid-cli.csr -CA valid-ca.crt -CAkey valid-ca.key -set_serial 1234 \
  -days 365 -outform PEM -out valid-cli.crt
 
@@ -109,15 +109,15 @@ Signature ok
 subject=/C=KR/L=Seoul/O=KFTC/OU=SerialNumber 123456789/CN=mtls.kftc.io/emailAddress=dy.ryu@kftc.or.kr
 Getting CA Private Key
 ```
-> *set_serial*은 인증서의 일련번호를 설정하는 것으로 아무 값이나 입력해도 된다.
+> *set_serial*은 인증서의 일련번호를 설정하는 것으로 아무 값이나 입력해도 된다.\
 > mTLS 검증 시 인증서 자체의 일련번호가 아니라, **Subject DN 안에 있는 일련번호**를 검증한다.
 
 현재 디렉토리에 **정상** 인증서인 `valid-cli.crt` 파일이 생성된다.
 
 ### SerialNumber가 다른 인증서
 
-**SerialNumber를 다르게**하여 CSR(Certificate Signing Request) 파일을 생성한다.
-```sh
+**SerialNumber를 다르게**하여 CSR 파일을 생성한다.
+```fish
 openssl req -new -key pass.key -out invalid-sn-cli.csr
 
 # 실행 결과
@@ -134,7 +134,7 @@ Email Address []:dy.ryu@kftc.or.kr
 ```
 
 유효한 CA 인증서(`valid-ca.crt`, `valid-ca.key`)로 CSR 파일(`invalid-sn-cli.csr`)을 서명한다.
-```sh
+```fish
 openssl x509 -req -in invalid-sn-cli.csr -CA valid-ca.crt -CAkey valid-ca.key -set_serial 1234 \
  -days 365 -outform PEM -out invalid-sn-cli.crt
 
@@ -149,7 +149,7 @@ Getting CA Private Key
 ### CA가 다른 인증서
 
 **유효하지 않은 CA 인증서**(`invalid-ca.crt`, `invalid-ca.key`)로 정상 인증서의 CSR 파일(`valid-cli.csr`)을 다시 서명한다.
-```sh
+```fish
 openssl x509 -req -in invalid-ca-cli.csr -CA invalid-ca.crt -CAkey invalid-ca.key -set_serial 1234 \
  -days 365 -outform PEM -out invalid-ca-cli.crt
 
