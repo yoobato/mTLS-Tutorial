@@ -35,12 +35,16 @@ bash scripts/test-mtls.sh https://YOUR-HOST/mtls-test.txt
 
 ## 문서 사이트 실행
 
-Node.js 22 이상, pnpm 11.25.0을 사용합니다. 이것은 문서 사이트를 위한 도구이며 mTLS 웹서버 실습의 필수 도구는 아닙니다.
+Node.js 22 이상, pnpm 11.25.0을 사용합니다. 프로젝트의 `.nvmrc`는 Node 22를 지정합니다. 이것은 문서 사이트를 위한 도구이며 mTLS 웹서버 실습의 필수 도구는 아닙니다.
 
 ```bash
+nvm install
+nvm use
 pnpm install --frozen-lockfile
 pnpm start
 ```
+
+새 터미널에서 작업할 때도 저장소 루트에서 `nvm use`를 먼저 실행합니다. `node -v`가 `v22` 이상인지 확인하세요. pnpm 11은 Node 20을 지원하지 않습니다.
 
 `http://127.0.0.1:8767`에서 확인합니다. 콘텐츠는 **`docs/*.md`를 직접 편집**합니다. 제목·본문·표·코드 블록은 일반 Markdown이며, 접는 예제는 HTML `<details>`를 사용합니다. 별도 프레임워크 문법이나 생성된 HTML을 수정할 필요가 없습니다. Mermaid 코드 블록도 지원합니다.
 
