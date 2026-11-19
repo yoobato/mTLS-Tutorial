@@ -1,0 +1,8 @@
+certs/
+.venv/
+__pycache__/
+.DS_Store
+test-results/
+site-dist/
+
+node_modules/
