@@ -1,12 +1,36 @@
 <!doctype html>
-<html lang="{{lang}}">
+<html lang="{{lang}}" prefix="og: https://ogp.me/ns#">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{title}} · mTLS Tutorial</title>
+  <title>{{seoTitle}}</title>
   <meta name="description" content="{{description}}">
-  <link rel="alternate" hreflang="ko" href="{{koHref}}">
-  <link rel="alternate" hreflang="en" href="{{enHref}}">
+  <meta name="author" content="{{author}}">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="{{canonicalUrl}}">
+  <link rel="alternate" hreflang="ko" href="{{koUrl}}">
+  <link rel="alternate" hreflang="en" href="{{enUrl}}">
+  <link rel="alternate" hreflang="x-default" href="{{enUrl}}">
+  <link rel="sitemap" type="application/xml" href="{{sitemapUrl}}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{siteName}}">
+  <meta property="og:title" content="{{seoTitle}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:url" content="{{canonicalUrl}}">
+  <meta property="og:locale" content="{{ogLocale}}">
+  <meta property="og:locale:alternate" content="{{ogAlternateLocale}}">
+  <meta property="og:image" content="{{imageUrl}}">
+  <meta property="og:image:secure_url" content="{{imageUrl}}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{imageAlt}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{seoTitle}}">
+  <meta name="twitter:description" content="{{description}}">
+  <meta name="twitter:image" content="{{imageUrl}}">
+  <meta name="twitter:image:alt" content="{{imageAlt}}">
+  <script type="application/ld+json">{{structuredData}}</script>
   <link rel="icon" type="image/svg+xml" href="{{base}}assets/certificate.svg">
   <script>
     (() => {
