@@ -1,3 +1,7 @@
+const english=document.documentElement.lang==='en';
+const messages=english
+  ? {copied:'Code copied.',copyFallback:'Select the code to copy it manually',light:'Switch to light mode',dark:'Switch to dark mode'}
+  : {copied:'코드를 복사했어요.',copyFallback:'직접 선택해 복사하세요',light:'밝은 모드로 전환',dark:'어두운 모드로 전환'};
 const menu=document.querySelector('.menu-toggle');
 const sidebar=document.querySelector('#sidebar');
 function closeMenu(){sidebar.classList.remove('open');menu.setAttribute('aria-expanded','false');}
@@ -5,7 +9,7 @@ menu.addEventListener('click',()=>{const expanded=menu.getAttribute('aria-expand
 sidebar.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
 let timer;
-document.querySelectorAll('.copy-code').forEach(button=>button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(button.closest('.code-block').querySelector('code').textContent);const status=document.querySelector('#copy-status');status.textContent='코드를 복사했어요.';status.classList.add('visible');clearTimeout(timer);timer=setTimeout(()=>status.classList.remove('visible'),1800);}catch{button.textContent='직접 선택해 복사하세요';}}));
+document.querySelectorAll('.copy-code').forEach(button=>button.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(button.closest('.code-block').querySelector('code').textContent);const status=document.querySelector('#copy-status');status.textContent=messages.copied;status.classList.add('visible');clearTimeout(timer);timer=setTimeout(()=>status.classList.remove('visible'),1800);}catch{button.textContent=messages.copyFallback;}}));
 const tocLinks=[...document.querySelectorAll('.page-toc a')];
 const observer=new IntersectionObserver(entries=>{const active=entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)[0];if(!active)return;tocLinks.forEach(a=>a.classList.toggle('active',decodeURIComponent(a.hash.slice(1))===active.target.id));},{rootMargin:'-70px 0px -65% 0px'});
 document.querySelectorAll('article h2').forEach(h=>observer.observe(h));
@@ -17,7 +21,8 @@ let explicitTheme=savedTheme==='light'||savedTheme==='dark';
 function updateThemeControl(){
   const dark=document.documentElement.dataset.theme==='dark';
   themeToggle.setAttribute('aria-pressed',String(dark));
-  themeToggle.title=dark?'밝은 모드로 전환':'어두운 모드로 전환';
+  themeToggle.title=dark?messages.light:messages.dark;
+  themeToggle.setAttribute('aria-label',themeToggle.title);
 }
 updateThemeControl();
 document.querySelectorAll('[data-tabs]').forEach(group=>{
