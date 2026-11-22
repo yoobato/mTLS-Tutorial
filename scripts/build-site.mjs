@@ -91,7 +91,7 @@ for (const locale of locales) {
     await copyFile(path.join(root, 'site/examples', locale.source, filename), path.join(out, locale.prefix, 'examples', filename));
   }
 }
-for (const filename of ['certificate.svg', 'og-image.png']) {
+for (const filename of ['certificate.svg', path.basename(metadata.image)]) {
   await copyFile(path.join(root, 'site/assets', filename), path.join(out, 'assets', filename));
 }
 for (const filename of ['styles.css', 'app.js']) await copyFile(path.join(root, 'site', filename), path.join(out, filename));

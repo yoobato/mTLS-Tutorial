@@ -1,34 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f5f7fa"/>
-  <rect x="40" y="40" width="1120" height="550" rx="12" fill="#fff" stroke="#dfe5ed"/>
-  <rect x="40" y="40" width="8" height="550" rx="4" fill="#1756a9"/>
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <rect x="96" y="210" width="64" height="6" rx="3" fill="#1756a9"/>
   <g font-family="Arial, Helvetica, sans-serif">
-    <text x="88" y="111" fill="#1756a9" font-size="18" font-weight="700" letter-spacing="2">A HANDS-ON GUIDE</text>
-    <text x="84" y="195" fill="#202124" font-size="68" font-weight="700" letter-spacing="-2">mTLS Tutorial</text>
-    <text x="88" y="242" fill="#586371" font-size="28">Mutual TLS with Nginx &amp; Apache</text>
-    <g transform="translate(88,294)">
-      <rect width="300" height="170" rx="8" fill="#f6f8fb" stroke="#d6dfeb"/>
-      <rect x="30" y="28" width="42" height="53" rx="5" fill="#fff" stroke="#6480a6" stroke-width="2"/>
-      <path d="M40 44h20m-20 10h14" fill="none" stroke="#6480a6" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="69" cy="76" r="13" fill="#1756a9"/>
-      <path d="m63 76 4 4 8-9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="95" y="65" fill="#202124" font-size="27" font-weight="700">Client</text>
-      <text x="30" y="128" fill="#586371" font-size="20">Verifies the server</text>
-    </g>
-    <path d="M420 351h334m-12-8 12 8-12 8M754 407H420m12-8-12 8 12 8" fill="none" stroke="#1756a9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="458" y="362" width="258" height="34" fill="#fff"/>
-    <text x="587" y="385" text-anchor="middle" fill="#1756a9" font-size="18" font-weight="700">Certificate authentication</text>
-    <g transform="translate(786,294)">
-      <rect width="300" height="170" rx="8" fill="#f6f8fb" stroke="#d6dfeb"/>
-      <rect x="30" y="28" width="42" height="53" rx="5" fill="#fff" stroke="#6480a6" stroke-width="2"/>
-      <path d="M40 44h20m-20 10h14" fill="none" stroke="#6480a6" stroke-width="2" stroke-linecap="round"/>
-      <circle cx="69" cy="76" r="13" fill="#1756a9"/>
-      <path d="m63 76 4 4 8-9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <text x="95" y="65" fill="#202124" font-size="27" font-weight="700">Server</text>
-      <text x="30" y="128" fill="#586371" font-size="20">Verifies the client</text>
-    </g>
-    <path d="M88 506h998" stroke="#dfe5ed"/>
-    <text x="88" y="546" fill="#586371" font-size="19">TLS 1.3 · Test certificates · Web server configuration · cURL</text>
-    <text x="1086" y="546" text-anchor="end" fill="#1756a9" font-size="19" font-weight="700">EN / KO</text>
+    <text x="90" y="330" fill="#202124" font-size="96" font-weight="700" letter-spacing="-3">mTLS Tutorial</text>
+    <text x="96" y="395" fill="#586371" font-size="32">Mutual TLS with Nginx &amp; Apache</text>
   </g>
 </svg>

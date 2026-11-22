@@ -8,7 +8,7 @@ The website is available in English and Korean. Use **EN / KO** in the header to
 
 ## What the tutorial covers
 
-- TLS 1.3 and the differences between regular TLS and mTLS.
+- Mutual TLS authentication and how it differs from regular TLS.
 - Prerequisites for an existing HTTPS server, with optional Docker examples.
 - Self-signed test CAs and three client certificates.
 - Nginx and Apache configuration for certificate validation and a Subject DN `serialNumber` check.
