@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-site.mjs",
-    "start": "node scripts/build-site.mjs && python3 -m http.server 8767 --bind 127.0.0.1 --directory site-dist",
+    "start": "node scripts/dev-server.mjs",
     "serve": "python3 -m http.server 8767 --bind 127.0.0.1 --directory site-dist"
   },
   "dependencies": {

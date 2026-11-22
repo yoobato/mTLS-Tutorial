@@ -20,6 +20,36 @@ function updateThemeControl(){
   themeToggle.title=dark?'밝은 모드로 전환':'어두운 모드로 전환';
 }
 updateThemeControl();
+document.querySelectorAll('[data-tabs]').forEach(group=>{
+  const tabs=[...group.querySelectorAll('[role="tab"]')];
+  function select(tab,focus=false,redraw=true){
+    tabs.forEach(button=>{
+      const active=button===tab;
+      button.setAttribute('aria-selected',String(active));
+      button.tabIndex=active?0:-1;
+      document.getElementById(button.getAttribute('aria-controls')).hidden=!active;
+    });
+    if(focus)tab.focus();
+    try{sessionStorage.setItem("mtls-tabs:"+group.dataset.tabs,tab.id);}catch{}
+    if(redraw)renderDiagrams();
+  }
+  tabs.forEach((tab,index)=>{
+    tab.addEventListener('click',()=>select(tab));
+    tab.addEventListener('keydown',event=>{
+      let next;
+      if(event.key==='ArrowRight')next=(index+1)%tabs.length;
+      if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;
+      if(event.key==='Home')next=0;
+      if(event.key==='End')next=tabs.length-1;
+      if(next!==undefined){event.preventDefault();select(tabs[next],true);}
+    });
+  });
+  try{
+    const saved=sessionStorage.getItem('mtls-tabs:'+group.dataset.tabs);
+    const remembered=tabs.find(tab=>tab.id===saved);
+    if(remembered)select(remembered,false,false);
+  }catch{}
+});
 const diagrams=[...document.querySelectorAll('.mermaid-diagram')].map(element=>({element,source:element.textContent}));
 let mermaidPromise;
 let renderQueue=Promise.resolve();
@@ -34,6 +64,7 @@ function renderDiagrams(){
       const {default:mermaid}=await mermaidPromise;
       mermaid.initialize({startOnLoad:false,securityLevel:'strict',theme:theme==='dark'?'dark':'neutral',look:'classic',fontFamily:'-apple-system, BlinkMacSystemFont, sans-serif'});
       for(const[i,{element,source}]of diagrams.entries()){
+        if(!element.getClientRects().length)continue;
         const result=await mermaid.render(`diagram-${serial}-${i}`,source);
         element.innerHTML=result.svg;
         element.removeAttribute('aria-busy');

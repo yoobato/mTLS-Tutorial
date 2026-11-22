@@ -6,3 +6,8 @@ test-results/
 site-dist/
 
 node_modules/
+
+.preview-dist/
+.preview-dist-next/
+
+.local-server/

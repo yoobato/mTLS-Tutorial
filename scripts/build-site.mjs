@@ -8,10 +8,10 @@ import loadLanguages from 'prismjs/components/index.js';
 
 const require = createRequire(import.meta.url);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const out = path.join(root, 'site-dist');
+const out = path.resolve(root, process.env.DOCS_OUTPUT_DIR || 'site-dist');
 const chapters = [
-  ['01-overview.md', '', 'mTLS 개요'],
-  ['02-environment.md', 'environment', '실습 안내'],
+  ['01-overview.md', '', '튜토리얼 개요'],
+  ['02-environment.md', 'environment', '사전 준비사항'],
   ['03-certificates.md', 'certificates', '테스트 인증서 생성'],
   ['04-webservers.md', 'webservers', '웹서버 설정'],
   ['05-testing.md', 'testing', 'cURL을 이용한 검증'],
@@ -41,7 +41,7 @@ for (const [index, [filename, route]] of chapters.entries()) {
     },
     code({text, lang}) {
       const language = (lang || 'text').split(/\s+/)[0];
-      if (language === 'mermaid') return `<div class="mermaid-diagram" role="img" aria-label="mTLS 검증 흐름" aria-busy="true">${escape(text)}</div>\n`;
+      if (language === 'mermaid') return `<div class="mermaid-diagram" role="img" aria-label="TLS 연결과 인증 흐름도" aria-busy="true">${escape(text)}</div>\n`;
       const grammar = Prism.languages[language];
       const code = grammar ? Prism.highlight(text, grammar, language) : escape(text);
       return `<div class="code-block"><div class="code-bar"><span>${escape(language)}</span><button class="copy-code" type="button" aria-label="코드 복사">복사</button></div><pre tabindex="0"><code>${code}</code></pre></div>\n`;
@@ -53,11 +53,15 @@ for (const [index, [filename, route]] of chapters.entries()) {
   content = content.replace(/<table>/g, '<div class="table-scroll" tabindex="0"><table>').replace(/<\/table>/g, '</table></div>');
   const navigation = chapters.map(([, other, label], i) => `<a href="${href(other)}"${i === index ? ' aria-current="page"' : ''}><span>${String(i + 1).padStart(2, '0')}</span>${escape(label)}</a>`).join('\n');
   const pagination = [index > 0 ? `<a href="${href(chapters[index - 1][1])}"><span>이전</span>← ${escape(chapters[index - 1][2])}</a>` : '', index < chapters.length - 1 ? `<a href="${href(chapters[index + 1][1])}"><span>다음</span>${escape(chapters[index + 1][2])} →</a>` : ''].join('');
-  const values = {title: escape(title), base, filename, navigation, content, pagination, toc: toc.map(({id, label}) => `<a href="#${encodeURIComponent(id)}">${escape(label)}</a>`).join('\n')};
+  const values = {title: escape(title), base, filename, navigation, content, pagination, tocHidden: toc.length ? '' : ' hidden', toc: toc.map(({id, label}) => `<a href="#${encodeURIComponent(id)}">${escape(label)}</a>`).join('\n')};
   const html = template.replace(/\{\{(\w+)\}\}/g, (_, key) => values[key] ?? '');
   const folder = path.join(out, route);
   await mkdir(folder, {recursive: true});
   await writeFile(path.join(folder, 'index.html'), html);
+}
+await mkdir(path.join(out, 'examples'), {recursive: true});
+for (const filename of ['nginx-https.conf', 'apache-https.conf']) {
+  await copyFile(path.join(root, 'site/examples', filename), path.join(out, 'examples', filename));
 }
 await copyFile(path.join(root, 'site/assets/certificate.svg'), path.join(out, 'assets/certificate.svg'));
 for (const filename of ['styles.css', 'app.js']) await copyFile(path.join(root, 'site', filename), path.join(out, filename));

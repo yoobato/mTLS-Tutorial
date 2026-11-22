@@ -1,134 +1,149 @@
-# 실습 안내
+# 사전 준비사항
 
-## 🧰 준비 조건
+이 튜토리얼은 **서버 인증서와 개인키가 설정되어 HTTPS 요청을 처리할 수 있는 웹서버**가 준비된 환경을 전제로 합니다. <small>(웹서버 구축과 HTTPS 설정 등의 절차는 다루지 않습니다.)</small>
 
-- Nginx 또는 Apache HTTP Server 2.4가 설치되어 있고 설정 파일을 수정·재적용할 수 있는 환경
-- OpenSSL 1.1.1 이상, cURL, Bash
-- 서버 인증서가 설정된 HTTPS 주소
-- 테스트 파일을 읽을 수 있는 웹서버 권한
+준비된 웹서버가 없다면 아래 [**Docker로 HTTPS 웹서버 실행**](#docker로-https-웹서버-실행)의 예시 파일을 사용합니다. <small>(이 경우에도 서버 인증서와 개인키는 미리 준비해야 합니다.)</small>
 
-웹서버의 설치 방식과 무관하게 **실행 중인 웹서버가 읽는 설정·인증서 경로**를 기준으로 적용합니다. 아래는 Linux 경로 예시이며 설치 환경에 따라 바꿉니다.
 
-| 항목 | 예시 |
+## 🧰 필요한 환경
+
+| 준비물 | 용도 |
 | --- | --- |
-| HTTPS 주소 | `https://api.example.com` — 본인 주소로 교체 |
-| 서버 인증서 | `/etc/letsencrypt/live/api.example.com/fullchain.pem` |
-| 서버 개인키 | `/etc/letsencrypt/live/api.example.com/privkey.pem` |
-| 클라이언트 신뢰 CA | `/etc/mtls-demo/valid-ca.crt` |
-| 정적 테스트 파일 | `/var/www/mtls-demo/mtls-test.txt` |
+| HTTPS가 적용된 Nginx 또는 Apache HTTP Server 2.4 | 정보제공자 역할의 웹서버 |
+| 서버 인증서와 개인키 | 서버의 HTTPS 인증 |
+| OpenSSL 1.1.1 이상 | 다음 단계에서 테스트 인증서 생성 |
+| cURL | HTTPS 요청과 이후 인증 결과 확인 |
+| Docker<small>(선택 사항)</small> | 웹서버가 없을 때 사용 |
 
-둘 중 한 웹서버만 선택해도 됩니다. 같은 서버에서 두 웹서버를 동시에 확인하려면 별도 포트나 주소를 사용하세요. 기존 443 리스너·가상호스트를 중복 선언하지 않습니다.
+> Nginx, Apache 외의 웹서버<small>(예. WebToB)</small>를 사용하는 경우, 해당 웹서버의 가이드를 확인해주세요.
 
-## 1. 먼저 일반 HTTPS 구성
 
-이미 HTTPS가 동작한다면 이 단계를 건너뜁니다. 서버 인증서가 없다면 **Let’s Encrypt로 서버 TLS 인증서를 발급하고 HTTPS부터 설정**합니다. 이 단계에서는 아직 클라이언트 인증서를 요구하지 않습니다.
+## 🌐 HTTPS가 적용된 설정 예시
 
-Let’s Encrypt의 HTTP-01 검증을 사용하는 예시입니다. 본인 소유 도메인의 DNS가 서버를 가리켜야 하며, 외부에서 80번 포트의 인증 경로에 접근할 수 있어야 합니다. Certbot은 [공식 설치 안내](https://certbot.eff.org/instructions)에 따라 준비합니다.
+다음은 **mTLS 설정<small>(클라이언트 인증)</small>을 추가하기 전**의 설정 참고입니다.
 
-```bash
-sudo mkdir -p /var/www/acme/.well-known/acme-challenge
-```
+<div class="tls-tabs" data-tabs="prepare-https">
+<div class="tls-tablist" role="tablist" aria-label="웹서버 선택">
+<button type="button" id="prepare-https-nginx-tab" role="tab" aria-selected="true" aria-controls="prepare-https-nginx-panel" tabindex="0">Nginx</button>
+<button type="button" id="prepare-https-apache-tab" role="tab" aria-selected="false" aria-controls="prepare-https-apache-panel" tabindex="-1">Apache</button>
+</div>
+<section class="tls-tabpanel" id="prepare-https-nginx-panel" role="tabpanel" aria-labelledby="prepare-https-nginx-tab" tabindex="0">
 
-<details open>
-<summary>Nginx</summary>
-
-HTTP 가상호스트에 인증 경로를 추가합니다.
-
-```nginx
-server {
-    listen 80;
-    server_name api.example.com;
-    location /.well-known/acme-challenge/ {
-        root /var/www/acme;
-    }
-}
-```
-
-</details>
-
-<details>
-<summary>Apache</summary>
-
-HTTP 가상호스트에 인증 경로를 추가합니다. 해당 주소의 80번 리스너는 이미 활성화되어 있어야 합니다.
-
-```apacheconf
-<VirtualHost *:80>
-    ServerName api.example.com
-    Alias /.well-known/acme-challenge/ /var/www/acme/.well-known/acme-challenge/
-    <Directory /var/www/acme/.well-known/acme-challenge/>
-        Require all granted
-    </Directory>
-</VirtualHost>
-```
-
-</details>
-
-설정을 검사·재적용한 뒤 발급합니다.
-
-```bash
-sudo certbot certonly --webroot \
-  --webroot-path /var/www/acme \
-  --domain api.example.com
-```
-
-발급된 `fullchain.pem`과 `privkey.pem`을 HTTPS 가상호스트에 설정합니다.
-
-<details open>
-<summary>Nginx</summary>
+Nginx의 `http {}` 내부에 포함되는 서버 설정입니다.
 
 ```nginx
 server {
     listen 443 ssl;
-    server_name api.example.com;
-    ssl_certificate /etc/letsencrypt/live/api.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.example.com/privkey.pem;
-    root /var/www/mtls-demo;
+    server_name {서버도메인};
+
+    ssl_certificate "{인증서경로}";
+    ssl_certificate_key "{개인키경로}";
+
+    root "{정적파일디렉터리}";
 }
 ```
 
-</details>
+</section>
+<section class="tls-tabpanel" id="prepare-https-apache-panel" role="tabpanel" aria-labelledby="prepare-https-apache-tab" tabindex="0" hidden>
 
-<details>
-<summary>Apache</summary>
-
-Apache는 `mod_ssl`과 443 리스너를 활성화한 상태에서 사용합니다.
+Apache의 `mod_ssl`과 `mod_authz_core`가 활성화된 상태를 전제로 합니다.
 
 ```apacheconf
+Listen 443
+
 <VirtualHost *:443>
-    ServerName api.example.com
+    ServerName {서버도메인}
     SSLEngine on
-    SSLCertificateFile /etc/letsencrypt/live/api.example.com/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/api.example.com/privkey.pem
-    DocumentRoot /var/www/mtls-demo
-    <Directory /var/www/mtls-demo>
+    SSLCertificateFile "{인증서경로}"
+    SSLCertificateKeyFile "{개인키경로}"
+
+    DocumentRoot "{정적파일디렉터리}"
+    <Directory "{정적파일디렉터리}">
         Require all granted
     </Directory>
 </VirtualHost>
 ```
 
-</details>
+</section>
+</div>
 
-## 2. 테스트 파일과 HTTPS 확인
 
-```bash
-sudo mkdir -p /var/www/mtls-demo
-printf 'mTLS OK\n' | sudo tee /var/www/mtls-demo/mtls-test.txt
-```
+## 📄 테스트 정적 파일 만들기
 
-설정을 검사·재적용한 뒤, 클라이언트 인증서 없이 HTTPS가 동작하는지 먼저 확인합니다.
+인증서 상호 검증이 완료되어 접근이 허용되었을 때 웹서버가 반환할 `mtls-test.txt`를 만듭니다. <small>(웹서버가 제공할 정적 파일 디렉터리에 해당 파일을 만듭니다.)</small>
 
 ```bash
-curl -i https://api.example.com/mtls-test.txt
+mkdir -p "{정적파일디렉터리}"
+printf 'mTLS OK\n' > "{정적파일디렉터리}/mtls-test.txt"
 ```
 
-이 단계에서는 HTTP 200과 `mTLS OK`가 나와야 합니다. 이후 **웹서버 설정** 페이지에서 mTLS를 추가하면 인증서 없는 요청은 거절됩니다.
 
-## 도메인 없이 로컬에서 실습할 경우
+## 🐳 Docker로 HTTPS 웹서버 실행
 
-기존 로컬 HTTPS 인증서를 사용하거나 `localhost` SAN이 포함된 테스트용 서버 인증서를 따로 준비할 수 있습니다. 이 경우 cURL에 `--cacert /path/to/server-ca.crt`를 추가합니다. 이 옵션은 **서버 인증용 신뢰 CA**이며, 웹서버가 클라이언트 인증에 사용하는 CA 설정과 별개입니다. `-k`로 서버 검증을 생략하지 않습니다.
+[Docker](https://docs.docker.com/get-started/get-docker/)가 실행 중이고, **서버 인증서·개인키·테스트 정적 파일**이 호스트에 준비되어 있어야 합니다. [Nginx 공식 이미지](https://hub.docker.com/_/nginx) 또는 [Apache 공식 이미지](https://hub.docker.com/_/httpd) 중 하나를 선택합니다.
 
-## 갱신과 운영 설정
+1. 아래 예시 설정 파일을 원하는 위치에 저장합니다.
+2. 파일 안의 도메인과 경로를 본인 환경에 맞게 바꿉니다. **이때 경로는 컨테이너 내부에서 읽을 경로**입니다. 컨테이너 내부 HTTPS 포트는 443으로 유지합니다.
+3. 실행 명령의 호스트 경로와 컨테이너 경로를 대응시킵니다. 정적 파일은 앞에서 만든 `mtls-test.txt`가 들어 있는 호스트 디렉터리를 연결합니다.
 
-Let’s Encrypt 인증서는 갱신 후 웹서버가 새 파일을 읽도록 reload 절차를 연결합니다. `sudo certbot renew --dry-run`으로 갱신 동작을 점검할 수 있습니다. HTTP-01 인증 경로는 클라이언트 인증을 요구하는 HTTPS 테스트 경로와 별도로 유지합니다.
+> 호스트와 컨테이너 경로는 모두 절대 경로로 지정합니다.
 
-이 문서의 서버 HTTPS 설정은 **클라이언트가 정보제공자 서버를 신뢰하기 위한 단계**입니다. 실제 오픈뱅킹의 요청자 인증은 이후 페이지에서 실제 오픈뱅킹 CA 체인을 신뢰하도록 별도로 설정합니다.
+<div class="tls-tabs" data-tabs="prepare-docker">
+<div class="tls-tablist" role="tablist" aria-label="웹서버 선택">
+<button type="button" id="prepare-docker-nginx-tab" role="tab" aria-selected="true" aria-controls="prepare-docker-nginx-panel" tabindex="0">Nginx</button>
+<button type="button" id="prepare-docker-apache-tab" role="tab" aria-selected="false" aria-controls="prepare-docker-apache-panel" tabindex="-1">Apache</button>
+</div>
+<section class="tls-tabpanel" id="prepare-docker-nginx-panel" role="tabpanel" aria-labelledby="prepare-docker-nginx-tab" tabindex="0">
+
+<a href="../examples/nginx-https.conf" download="nginx-https.conf">📥 Nginx HTTPS 설정 예시 다운로드</a>
+
+```bash
+docker run -d --name mtls-demo-nginx \
+  -p "127.0.0.1:{호스트HTTPS포트}:443" \
+  --mount "type=bind,src={호스트설정파일경로},dst=/etc/nginx/conf.d/default.conf,readonly" \
+  --mount "type=bind,src={호스트인증서경로},dst={인증서경로},readonly" \
+  --mount "type=bind,src={호스트개인키경로},dst={개인키경로},readonly" \
+  --mount "type=bind,src={호스트정적파일디렉터리},dst={정적파일디렉터리},readonly" \
+  nginx:stable
+```
+
+</section>
+<section class="tls-tabpanel" id="prepare-docker-apache-panel" role="tabpanel" aria-labelledby="prepare-docker-apache-tab" tabindex="0" hidden>
+
+<a href="../examples/apache-https.conf" download="apache-https.conf">📥 Apache HTTPS 설정 예시 다운로드</a>
+
+```bash
+docker run -d --name mtls-demo-apache \
+  -p "127.0.0.1:{호스트HTTPS포트}:443" \
+  --mount "type=bind,src={호스트설정파일경로},dst=/usr/local/apache2/conf/extra/https.conf,readonly" \
+  --mount "type=bind,src={호스트인증서경로},dst={인증서경로},readonly" \
+  --mount "type=bind,src={호스트개인키경로},dst={개인키경로},readonly" \
+  --mount "type=bind,src={호스트정적파일디렉터리},dst={정적파일디렉터리},readonly" \
+  httpd:2.4 httpd-foreground \
+  -C 'LoadModule ssl_module modules/mod_ssl.so' \
+  -C 'LoadModule socache_shmcb_module modules/mod_socache_shmcb.so' \
+  -c 'Include /usr/local/apache2/conf/extra/https.conf'
+```
+
+</section>
+</div>
+
+
+## ✅ 웹서버 환경설정 확인
+
+`cURL`로 **HTTP 200**과 본문 `mTLS OK`가 나오는지 확인합니다.
+
+```bash
+curl -i "https://{서버도메인}/mtls-test.txt"
+```
+
+### Docker로 로컬에서 웹서버를 실행한 경우
+
+```bash
+curl --resolve "{서버도메인}:{호스트HTTPS포트}:127.0.0.1" \
+  -i "https://{서버도메인}:{호스트HTTPS포트}/mtls-test.txt"
+```
+
+> `--resolve`는 인증서를 검증할 도메인은 유지하면서, 실제 연결은 로컬 Docker 서버의 `127.0.0.1`로 보내기 위해 사용합니다.
+>
+> self-signed 등 별도 신뢰 설정이 필요한 서버 인증서라면 `--cacert "{서버인증서를검증할CA인증서경로}"`를 추가합니다. self-signed 서버 인증서 자체를 신뢰하는 경우에는 그 인증서 파일을 지정합니다.
