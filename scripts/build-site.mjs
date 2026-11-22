@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir, readdir, rm, copyFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { Marked } from 'marked';
 import Prism from 'prismjs';
@@ -12,7 +13,8 @@ const out = path.resolve(root, process.env.DOCS_OUTPUT_DIR || 'site-dist');
 const metadata = JSON.parse(await readFile(path.join(root, 'site/metadata.json'), 'utf8'));
 const siteUrl = new URL(metadata.siteUrl.endsWith('/') ? metadata.siteUrl : `${metadata.siteUrl}/`);
 const pageUrl = (prefix, route) => new URL([prefix, route].filter(Boolean).join('/') + (prefix || route ? '/' : ''), siteUrl).href;
-const imageUrl = new URL(metadata.image, siteUrl).href;
+const imageHash = createHash('sha256').update(await readFile(path.join(root, 'site', metadata.image))).digest('hex').slice(0, 12);
+const imageUrl = `${new URL(metadata.image, siteUrl).href}?v=${imageHash}`;
 const sitemapUrls = [];
 const chapters = [
   ['01-overview.md', '', '튜토리얼 개요', 'Overview'],

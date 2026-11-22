@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#ffffff"/>
-  <rect x="96" y="210" width="64" height="6" rx="3" fill="#1756a9"/>
+  <svg x="88" y="218" width="144" height="144" viewBox="0 0 32 32" fill="none"><rect x="5.5" y="3.5" width="19" height="24" rx="2.5" stroke="#6480a6" stroke-width="1.6"/><path d="M10 10h10M10 14h7" stroke="#6480a6" stroke-width="1.6" stroke-linecap="round"/><circle cx="23" cy="23" r="7" fill="#1756a9"/><path d="m19.8 23 2.2 2.2 4-4.4" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
   <g font-family="Arial, Helvetica, sans-serif">
-    <text x="90" y="330" fill="#202124" font-size="96" font-weight="700" letter-spacing="-3">mTLS Tutorial</text>
-    <text x="96" y="395" fill="#586371" font-size="32">Mutual TLS with Nginx &amp; Apache</text>
+    <text x="270" y="335" fill="#202124" font-size="120" font-weight="700" letter-spacing="-3">mTLS Tutorial</text>
+    <text x="278" y="405" fill="#586371" font-size="40">Mutual TLS with Nginx &amp; Apache</text>
   </g>
 </svg>
